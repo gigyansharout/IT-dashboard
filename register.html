@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Registration</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        /* Increase card width slightly for register page to fit 2 columns */
+        .register-container {
+            max-width: 580px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Top Navigation Bar -->
+        <header class="navbar">
+            <div class="nav-links">
+                <a href="#">Home</a>
+                <a href="#">About</a>
+                <a href="#">Communities</a>
+                <a href="#">Contacts</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="#" class="nav-btn help-btn">Help</a>
+                <a href="login.html" class="nav-btn action-btn">Login</a>
+            </div>
+        </header>
+
+        <!-- Main Body Grid/Flex -->
+        <main class="main-content">
+            <!-- Left Hero Section -->
+            <div class="hero-text">
+                <h1>Industrial<br><span style="text-transform: lowercase;">portal</span></h1>
+            </div>
+
+            <!-- Right Form Card -->
+            <div class="login-container register-container">
+                <!-- Top Circular Badge -->
+                <div class="avatar-circle">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+
+                <!-- Centered Logo Box -->
+                <div class="logo-container">
+                    <img src="logo.jpg" alt="NALCO Logo" onerror="this.src='images/nalco.png'">
+                </div>
+
+                <!-- Registration Form -->
+                <form id="registerForm" class="login-form">
+                    <div class="form-grid">
+                        <!-- Employee ID -->
+                        <div class="input-group">
+                            <label for="empid">Employee ID *</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-id-card icon"></i>
+                                <input type="text" id="empid" name="employeeId" placeholder="Enter Employee ID" required>
+                            </div>
+                        </div>
+
+                        <!-- Full Name -->
+                        <div class="input-group">
+                            <label for="fullname">Full Name *</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-user icon"></i>
+                                <input type="text" id="fullname" name="fullName" placeholder="Enter Full Name" required>
+                            </div>
+                        </div>
+
+                        <!-- Email ID -->
+                        <div class="input-group">
+                            <label for="email">Email ID *</label>
+                            <div class="input-wrapper">
+                                <i class="fa-regular fa-envelope icon"></i>
+                                <input type="email" id="email" name="email" placeholder="Enter Email ID" required>
+                            </div>
+                        </div>
+
+                        <!-- Mobile Number -->
+                        <div class="input-group">
+                            <label for="mobile">Mobile Number *</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-phone icon"></i>
+                                <input type="tel" id="mobile" name="mobileNumber" maxlength="10" placeholder="10-digit Mobile" required
+                                       oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)">
+                            </div>
+                        </div>
+
+                        <!-- Department -->
+                        <div class="input-group">
+                            <label for="department">Department *</label>
+                            <select id="department" name="department" required>
+                                <option value="">Select Department</option>
+                                <option value="Production">Production</option>
+                                <option value="Electrical">Electrical</option>
+                                <option value="Mechanical">Mechanical</option>
+                                <option value="IT">IT</option>
+                                <option value="HR">HR</option>
+                            </select>
+                        </div>
+
+                        <!-- Designation -->
+                        <div class="input-group">
+                            <label for="designation">Designation *</label>
+                            <select id="designation" name="designation" required>
+                                <option value="">Select Designation</option>
+                                <option value="Engineer">Engineer</option>
+                                <option value="Supervisor">Supervisor</option>
+                                <option value="Manager">Manager</option>
+                                <option value="Operator">Operator</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="input-group">
+                            <label for="password">Password *</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-lock icon"></i>
+                                <input type="password" id="password" name="password" placeholder="Create Password" required>
+                                <button type="button" class="toggle-password" id="togglePassword" aria-label="Toggle password visibility">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="input-group">
+                            <label for="confirmPassword">Confirm Password *</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-lock icon"></i>
+                                <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                            </div>
+                        </div>
+
+                        <!-- Captcha (Full Width) -->
+                        <div class="input-group full">
+                            <label>Enter Captcha *</label>
+                            <div class="captcha-row">
+                                <div class="captcha-box" id="captcha"></div>
+                                <div class="refresh" id="refreshCaptcha">🔄</div>
+                                <input type="text" id="captchaInput" placeholder="Type Captcha" required>
+                            </div>
+                        </div>
+
+                        <!-- Terms & Conditions Checkbox (Full Width) -->
+                        <div class="full terms-row">
+                            <input type="checkbox" id="terms" required>
+                            <label for="terms" class="checkbox-label">I agree to Terms & Conditions</label>
+                        </div>
+
+                        <!-- Submit Button (Full Width) -->
+                        <div class="full" style="margin-top: 10px;">
+                            <button type="submit" class="btn" id="registerBtn">
+                                <span class="btn-text">Sign Up &rarr;</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Footer Link -->
+                    <div class="bottom">
+                        Already have an account? <a href="login.html">Log in</a>
+                    </div>
+                </form>
+
+                <!-- OTP/2FA Form (Hidden Initially) -->
+                <form id="otpForm" class="login-form" style="display: none;">
+                    <div class="avatar-circle">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+
+                    <div class="logo-container" style="margin-top: 15px;">
+                        <img src="logo.jpg" alt="NALCO Logo" onerror="this.src='images/nalco.png'">
+                    </div>
+
+                    <div style="text-align: center; margin-bottom: 20px; margin-top: 10px;">
+                        <h2 style="color: var(--primary-color); font-weight: 800; font-size: 20px; letter-spacing: 0.5px;">TWO-FACTOR AUTH</h2>
+                        <p style="font-size: 13px; color: #64748b; margin-top: 5px;">Scan this QR code using Google Authenticator or Authy to activate your account.</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <div id="qrcode" style="display: inline-flex; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;"></div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="otp">Authenticator Code *</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-key icon"></i>
+                            <input type="text" id="otp" name="otp" placeholder="e.g. 123456" required maxlength="6" style="text-align: center; font-size: 20px; letter-spacing: 3px; padding-left: 16px;">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" id="verifyOtpBtn" style="margin-top: 20px;">
+                        <span class="btn-text">Verify & Activate &rarr;</span>
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="chatbot.js" defer></script>
+</body>
+</html>

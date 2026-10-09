@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Login</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Top Navigation Bar -->
+        <header class="navbar">
+            <div class="nav-links">
+                <a href="#">Home</a>
+                <a href="#">About</a>
+                <a href="#">Communities</a>
+                <a href="#">Contacts</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="#" class="nav-btn help-btn">Help</a>
+                <a href="register.html" class="nav-btn action-btn">Register</a>
+            </div>
+        </header>
+
+        <!-- Main Body Grid/Flex -->
+        <main class="main-content">
+            <!-- Left Hero Section -->
+            <div class="hero-text">
+                <h1>Industrial<br><span style="text-transform: lowercase;">portal</span></h1>
+            </div>
+
+            <!-- Right Form Card -->
+            <div class="login-container">
+                <!-- Top Circular Badge -->
+                <div class="avatar-circle">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+
+                <!-- Centered Logo Box -->
+                <div class="logo-container">
+                    <img src="logo.jpg" alt="NALCO Logo" onerror="this.src='images/nalco.png'">
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" class="login-form">
+                    <!-- Role Selector slider -->
+                    <div class="role-slider-container">
+                        <label>Select Role *</label>
+                        <div class="role-slider">
+                            <input type="radio" name="role" id="role_admin" value="Admin">
+                            <label for="role_admin" class="role-label">Admin</label>
+
+                            <input type="radio" name="role" id="role_manager" value="Manager" checked>
+                            <label for="role_manager" class="role-label">Manager</label>
+
+                            <input type="radio" name="role" id="role_employee" value="Employee">
+                            <label for="role_employee" class="role-label">Employee</label>
+
+                            <div class="slider-selection"></div>
+                        </div>
+                    </div>
+
+                    <!-- Email Field -->
+                    <div class="input-group">
+                        <label for="email">Email *</label>
+                        <div class="input-wrapper">
+                            <i class="fa-regular fa-envelope icon"></i>
+                            <input type="email" id="email" name="email" placeholder="Enter your email" required autocomplete="email">
+                        </div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="input-group">
+                        <label for="password">Password *</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-lock icon"></i>
+                            <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+                            <button type="button" class="toggle-password" id="togglePassword" aria-label="Toggle password visibility">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Captcha Field -->
+                    <div class="input-group">
+                        <label>Enter Captcha *</label>
+                        <div class="captcha-row">
+                            <div class="captcha-box" id="captcha">Loading...</div>
+                            <div class="refresh" id="refreshCaptcha">🔄</div>
+                            <input type="text" id="captchaAnswer" placeholder="Type Captcha" required>
+                            <input type="hidden" id="captchaId">
+                        </div>
+                    </div>
+
+                    <!-- Form Actions: Remember Me & Forgot Password -->
+                    <div class="form-actions">
+                        <label class="remember-me">
+                            <input type="checkbox" id="remember" name="remember">
+                            <span>Remember me</span>
+                        </label>
+                        <a href="#" class="forgot-password">Forgot Password?</a>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn" id="loginBtn">
+                        <span class="btn-text">Login &rarr;</span>
+                    </button>
+
+                    <!-- Footer Link -->
+                    <div class="bottom">
+                        Don't have an account? <a href="register.html">Sign up</a>
+                    </div>
+                </form>
+
+                <!-- OTP/2FA Form (Hidden Initially) -->
+                <form id="otpForm" class="login-form" style="display: none;">
+                    <div class="avatar-circle">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    
+                    <div class="logo-container" style="margin-top: 15px;">
+                        <img src="logo.jpg" alt="NALCO Logo" onerror="this.src='images/nalco.png'">
+                    </div>
+
+                    <div style="text-align: center; margin-bottom: 25px; margin-top: 10px;">
+                        <h2 style="color: var(--primary-color); font-weight: 800; font-size: 20px; letter-spacing: 0.5px;">TWO-FACTOR AUTH</h2>
+                        <p style="font-size: 13px; color: #64748b; margin-top: 5px;">Enter the 6-digit verification code from your Authenticator App.</p>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="otp">Authenticator Code *</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-key icon"></i>
+                            <input type="text" id="otp" name="otp" placeholder="e.g. 123456" required maxlength="6" style="text-align: center; font-size: 20px; letter-spacing: 3px; padding-left: 16px;">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" id="verifyOtpBtn" style="margin-top: 25px;">
+                        <span class="btn-text">Verify Login &rarr;</span>
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="chatbot.js" defer></script>
+</body>
+</html>

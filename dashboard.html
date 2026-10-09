@@ -1,0 +1,2916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NALCO IT Asset Management & Compliance Overview</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- html2canvas and jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        /* Base Design Token overrides for Premium Aesthetic */
+        :root {
+            --theme-color-blue: #1e3a8a;
+            --theme-hover-blue: #172554;
+            --theme-gradient-blue: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            
+            --theme-color-green: #0f766e;
+            --theme-hover-green: #115e59;
+            --theme-gradient-green: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+            
+            --theme-color-amber: #b45309;
+            --theme-hover-amber: #92400e;
+            --theme-gradient-amber: linear-gradient(135deg, #b45309 0%, #f59e0b 100%);
+            
+            /* Dynamic variables mapping, defaulted to Blue */
+            --theme-color: var(--theme-color-blue);
+            --theme-hover: var(--theme-hover-blue);
+            --theme-gradient: var(--theme-gradient-blue);
+            
+            --panel-bg: rgba(255, 255, 255, 0.85);
+            --border-glow: 0 8px 32px rgba(31, 38, 135, 0.05);
+            --card-radius: 16px;
+        }
+
+        body.theme-blue {
+            --theme-color: var(--theme-color-blue);
+            --theme-hover: var(--theme-hover-blue);
+            --theme-gradient: var(--theme-gradient-blue);
+        }
+        body.theme-green {
+            --theme-color: var(--theme-color-green);
+            --theme-hover: var(--theme-hover-green);
+            --theme-gradient: var(--theme-gradient-green);
+        }
+        body.theme-amber {
+            --theme-color: var(--theme-color-amber);
+            --theme-hover: var(--theme-hover-amber);
+            --theme-gradient: var(--theme-gradient-amber);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            display: none; /* remove standard background overlay */
+        }
+
+        /* Layout Structure */
+        .dashboard-wrapper {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar Panel (Filter Controls) */
+        .filter-sidebar {
+            width: 300px;
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            padding: 30px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.02);
+            z-index: 100;
+        }
+
+        .filter-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 20px;
+            border-bottom: 1.5px solid #f1f5f9;
+        }
+
+        .filter-logo img {
+            height: 36px;
+            width: auto;
+            border-radius: 4px;
+        }
+
+        .filter-logo span {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--theme-color);
+            letter-spacing: 0.5px;
+            transition: color 0.3s ease;
+        }
+
+        .filter-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .filter-section h4 {
+            font-size: 11px;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 160px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        /* Custom Scrollbar for filter lists */
+        .filter-group::-webkit-scrollbar, .main-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .filter-group::-webkit-scrollbar-track, .main-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .filter-group::-webkit-scrollbar-thumb, .main-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .filter-btn {
+            background: #f8fafc;
+            border: 1.5px solid #f1f5f9;
+            border-radius: 8px;
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--theme-color);
+            color: var(--theme-color);
+            background: rgba(30, 58, 138, 0.02);
+        }
+
+        .filter-btn.active {
+            background: var(--theme-color);
+            border-color: var(--theme-color);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.15);
+        }
+
+        .filter-btn .badge {
+            font-size: 11px;
+            background: #e2e8f0;
+            color: #475569;
+            padding: 2px 6px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        .filter-btn.active .badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+
+        .clear-filters-btn {
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        .clear-filters-btn:hover {
+            background: #fecaca;
+        }
+
+        /* Sidebar Navigation Tabs */
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-bottom: 15px;
+            border-bottom: 1.5px solid #f1f5f9;
+        }
+
+        .nav-tab-btn {
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1.5px solid transparent;
+            background: #f8fafc;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-tab-btn:hover {
+            color: var(--theme-color);
+            background: rgba(30, 58, 138, 0.05);
+            border-color: rgba(30, 58, 138, 0.1);
+        }
+
+        .nav-tab-btn.active {
+            background: var(--theme-color);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.15);
+        }
+
+        .nav-tab-btn.active:hover {
+            background: var(--theme-hover);
+            color: #ffffff;
+        }
+        
+        .clickable-profile {
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+            position: relative;
+        }
+        .clickable-profile:hover {
+            opacity: 0.85;
+        }
+        .clickable-profile::after {
+            content: '✏️';
+            font-size: 10px;
+            position: absolute;
+            top: -2px;
+            right: -12px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .clickable-profile:hover::after {
+            opacity: 1;
+        }
+
+        .status-pill.present {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-pill.absent {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .status-pill.leave {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+
+        /* Main Portal Container */
+        .main-portal {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            height: 100vh;
+            background: #f8fafc;
+        }
+
+        /* Premium Dashboard Header */
+        .portal-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.01);
+        }
+
+        .user-identity {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--theme-gradient);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(30, 58, 138, 0.1);
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-info .name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .user-info .sub {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Role Badges */
+        .role-badge-premium {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .role-badge-premium.employee {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .role-badge-premium.manager {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .role-badge-premium.admin {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* Theme Selector */
+        .theme-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 30px;
+        }
+
+        .theme-swatch {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 2px solid #ffffff;
+        }
+
+        .theme-swatch:hover {
+            transform: scale(1.15);
+        }
+
+        .theme-swatch.swatch-blue { background: var(--theme-color-blue); }
+        .theme-swatch.swatch-green { background: var(--theme-color-green); }
+        .theme-swatch.swatch-amber { background: var(--theme-color-amber); }
+
+        .theme-swatch.active {
+            box-shadow: 0 0 0 2px #94a3b8;
+            transform: scale(1.1);
+        }
+
+        .export-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-header-action {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-header-action:hover {
+            border-color: var(--theme-color);
+            color: var(--theme-color);
+        }
+
+        .btn-logout-premium {
+            background: #f1f5f9;
+            border: none;
+            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            color: #ef4444;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .btn-logout-premium:hover {
+            background: #fee2e2;
+        }
+
+        /* Dashboard Content Box */
+        .dashboard-content {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Banner Title styling */
+        .dashboard-banner {
+            background: var(--theme-gradient);
+            border-radius: var(--card-radius);
+            padding: 30px 40px;
+            color: #ffffff;
+            box-shadow: 0 10px 30px rgba(30, 58, 138, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dashboard-banner::after {
+            content: "";
+            position: absolute;
+            right: -100px;
+            top: -100px;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 50%;
+        }
+
+        .dashboard-banner-text {
+            position: relative;
+            z-index: 2;
+        }
+
+        .dashboard-banner h1 {
+            font-size: 26px;
+            font-weight: 800;
+            margin: 0 0 6px 0;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .dashboard-banner p {
+            font-size: 13px;
+            opacity: 0.85;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* KPI Grid */
+        .kpi-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            flex-grow: 1;
+        }
+
+        .kpi-card {
+            background: #ffffff;
+            border-radius: var(--card-radius);
+            padding: 24px;
+            border: 1px solid #e2e8f0;
+            box-shadow: var(--border-glow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 120px;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
+            border-color: var(--theme-color);
+        }
+
+        .kpi-card-header {
+            font-size: 12px;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-card-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-top: 6px;
+        }
+
+        .kpi-card-footer {
+            font-size: 12px;
+            color: #10b981;
+            font-weight: 700;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .kpi-card-footer.neutral {
+            color: #64748b;
+        }
+
+        .btn-add-kpi {
+            background: #ffffff;
+            border: 2px dashed #cbd5e1;
+            border-radius: var(--card-radius);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            height: 120px;
+            width: 150px;
+            flex-shrink: 0;
+        }
+
+        .btn-add-kpi:hover {
+            border-color: var(--theme-color);
+            color: var(--theme-color);
+            background: rgba(30, 58, 138, 0.01);
+        }
+
+        .btn-add-kpi i {
+            font-size: 20px;
+        }
+
+        .btn-add-kpi span {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .kpi-delete-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            color: #ef4444;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 4px;
+        }
+
+        .kpi-card:hover .kpi-delete-btn {
+            opacity: 1;
+        }
+
+        /* Charts Grid Layout */
+        .charts-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .chart-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--card-radius);
+            padding: 25px;
+            box-shadow: var(--border-glow);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+            min-height: 320px;
+        }
+
+        .chart-card h3 {
+            font-size: 15px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chart-canvas-container {
+            position: relative;
+            flex-grow: 1;
+            width: 100%;
+            height: 220px;
+        }
+
+        /* Treemap Style definitions */
+        .treemap-container {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+
+        .treemap-cell {
+            border: 1px solid #ffffff;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            overflow: hidden;
+            font-family: inherit;
+        }
+
+        .treemap-cell:hover {
+            filter: brightness(1.08);
+            transform: scale(1.005);
+            z-index: 2;
+        }
+
+        .treemap-cell-content {
+            color: #ffffff;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .treemap-cell-name {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        .treemap-cell-value {
+            font-size: 13px;
+            font-weight: 800;
+            margin-top: 1px;
+        }
+
+        /* Registry Table Styling */
+        .table-section {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--card-radius);
+            padding: 25px;
+            box-shadow: var(--border-glow);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .table-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .table-header-row h3 {
+            font-size: 16px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .table-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-wrapper input {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 12px 8px 36px;
+            font-size: 13px;
+            font-weight: 500;
+            width: 240px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .search-wrapper input:focus {
+            border-color: var(--theme-color);
+            background: #ffffff;
+            box-shadow: 0 4px 10px rgba(30, 58, 138, 0.05);
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .registry-table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .registry-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .registry-table th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            padding: 14px 16px;
+            border-bottom: 1.5px solid #e2e8f0;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s ease;
+        }
+
+        .registry-table th:hover {
+            background: #f1f5f9;
+        }
+
+        .registry-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .registry-table tbody tr:hover {
+            background: rgba(241, 245, 249, 0.4);
+        }
+
+        .registry-table .po-value-cell {
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        /* Badges inside Table */
+        .status-pill {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .status-pill.active {
+            background: #ecfdf5;
+            color: #10b981;
+        }
+
+        .status-pill.expired {
+            background: #fffbeb;
+            color: #b45309;
+        }
+
+        .status-pill.none {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        /* Pagination style */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-pagination {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #475569;
+        }
+
+        .btn-pagination:hover:not(:disabled) {
+            border-color: var(--theme-color);
+            color: var(--theme-color);
+        }
+
+        .btn-pagination:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Inline Editing Pencil CSS overlays */
+        .editable {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            border-radius: 4px;
+            padding: 2px 4px;
+        }
+
+        .editable:hover {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        /* For white text on banner */
+        .dashboard-banner .editable:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .edit-pencil {
+            opacity: 0;
+            font-size: 11px;
+            color: var(--theme-color);
+            transition: opacity 0.2s ease;
+        }
+
+        .dashboard-banner .edit-pencil {
+            color: #ffffff;
+        }
+
+        .editable:hover .edit-pencil {
+            opacity: 0.8;
+        }
+
+        /* Form styling for inline editing */
+        .inline-edit-form {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .inline-edit-input {
+            border: 2px solid var(--theme-color);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-family: inherit;
+            font-size: inherit;
+            font-weight: inherit;
+            color: inherit;
+            background: #ffffff;
+            outline: none;
+            width: auto;
+        }
+
+        .dashboard-banner .inline-edit-input {
+            background: rgba(255, 255, 255, 0.9);
+            color: #000000;
+        }
+
+        .inline-edit-btn {
+            background: var(--theme-color);
+            border: none;
+            color: #ffffff;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .inline-edit-cancel {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* New KPI Modal overlay */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.3);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            border-radius: var(--card-radius);
+            padding: 30px;
+            width: 400px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .modal-card h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 11px;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .form-group input {
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: var(--theme-color);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* Export Loader Overlay */
+        .export-loader {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            font-weight: 700;
+            color: var(--theme-color);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.05);
+            border-top: 4px solid var(--theme-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-wrapper {
+                flex-direction: column;
+            }
+            .filter-sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .main-portal {
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body class="theme-blue">
+    <div class="dashboard-wrapper">
+        <!-- Sidebar Filter controls matching PDF layout -->
+        <aside class="filter-sidebar">
+            <div class="filter-logo">
+                <img src="logo.jpg" alt="Logo" onerror="this.src='images/nalco.png'">
+                <span id="editable-nav-logo-text" class="editable-element" data-key="nav-logo-text">NALCO IT Portal</span>
+            </div>
+
+            <!-- Sidebar Navigation Tabs -->
+            <div class="sidebar-nav" id="sidebarNavContainer">
+                <button class="nav-tab-btn active" id="btnTabDashboard">
+                    <i class="fa-solid fa-chart-line"></i> <span>Dashboard</span>
+                </button>
+                <button class="nav-tab-btn" id="btnTabEmployees" style="display: none;">
+                    <i class="fa-solid fa-users"></i> <span>Employees</span>
+                </button>
+                <button class="nav-tab-btn" id="btnTabLogs" style="display: none;">
+                    <i class="fa-solid fa-clock-rotate-left"></i> <span>Activity Log</span>
+                </button>
+            </div>
+
+            <div id="sidebarFiltersContainer">
+                <!-- Building Filter -->
+                <div class="filter-section">
+                    <h4 class="editable-element" data-key="title-building">Building</h4>
+                    <div class="filter-group" id="filter-building-group">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Warranty Status Filter -->
+                <div class="filter-section">
+                    <h4 class="editable-element" data-key="title-warranty">Warranty Status</h4>
+                    <div class="filter-group" id="filter-warranty-group">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="filter-section">
+                    <h4 class="editable-element" data-key="title-category">Category</h4>
+                    <div class="filter-group" id="filter-category-group">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- AMC Status Filter -->
+                <div class="filter-section">
+                    <h4 class="editable-element" data-key="title-amc">AMC Status</h4>
+                    <div class="filter-group" id="filter-amc-group">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <button class="clear-filters-btn" id="btnClearFilters" style="width: 100%;">
+                    <i class="fa-solid fa-filter-circle-xmark"></i> Clear All Filters
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Portal Content -->
+        <main class="main-portal">
+            <!-- Header bar with User Profile and Actions -->
+            <header class="portal-header">
+                <div class="user-identity">
+                    <div class="user-avatar" id="hdr-avatar">
+                        <i class="fa-solid fa-user-gear"></i>
+                    </div>
+                    <div class="user-info">
+                        <span class="name" id="hdr-user-name">Portal Member</span>
+                        <div class="sub">
+                            <span id="hdr-user-empid">Employee ID: -</span>
+                            <span class="role-badge-premium employee" id="hdr-role-badge">Employee</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <!-- Admin Theme Switcher -->
+                    <div class="theme-selector" id="themeSelectorContainer" style="display: none;">
+                        <div class="theme-swatch swatch-blue active" data-theme="blue" title="Blue Theme"></div>
+                        <div class="theme-swatch swatch-green" data-theme="green" title="Green Theme"></div>
+                        <div class="theme-swatch swatch-amber" data-theme="amber" title="Amber Theme"></div>
+                    </div>
+
+                    <!-- Admin PDF/PNG Exporters -->
+                    <div class="export-group" id="exportControls" style="display: none;">
+                        <button class="btn-header-action" id="btnExportPNG">
+                            <i class="fa-solid fa-file-image"></i> Export PNG
+                        </button>
+                        <button class="btn-header-action" id="btnExportPDF">
+                            <i class="fa-solid fa-file-pdf"></i> Export PDF
+                        </button>
+                    </div>
+
+                    <button class="btn-logout-premium" id="btnLogout" title="Logout from Session">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Content Container -->
+            <div class="dashboard-content" id="dashboard-content">
+                <!-- Overview Banner -->
+                <div class="dashboard-banner">
+                    <div class="dashboard-banner-text">
+                        <h1 class="editable-element" data-key="main-title" id="bannerMainTitle">Nalco IT Asset Management and Compliance Overview</h1>
+                        <p class="editable-element" data-key="main-subtitle" id="bannerSubTitle">Operational statistics and hardware registry lifecycle management analytics</p>
+                    </div>
+                    <div style="font-size: 40px; opacity: 0.15;">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                </div>
+
+                <!-- KPI Cards Area -->
+                <div class="kpi-row">
+                    <div class="kpi-grid" id="kpiGridContainer">
+                        <!-- Loaded dynamically -->
+                    </div>
+                    <button class="btn-add-kpi" id="btnAddKpiCard" style="display: none;">
+                        <i class="fa-solid fa-circle-plus"></i>
+                        <span>Add KPI</span>
+                    </button>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-row">
+                    <!-- Asset Count by Category Bar -->
+                    <div class="chart-card">
+                        <h3 class="editable-element" data-key="chart-category-title">Asset Count By Category</h3>
+                        <div class="chart-canvas-container">
+                            <canvas id="chartCategory"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Warranty Status Donut -->
+                    <div class="chart-card">
+                        <h3 class="editable-element" data-key="chart-warranty-title">Warranty Status</h3>
+                        <div class="chart-canvas-container">
+                            <canvas id="chartWarranty"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- AMC Status Donut -->
+                    <div class="chart-card">
+                        <h3 class="editable-element" data-key="chart-amc-title">AMC Contact Status</h3>
+                        <div class="chart-canvas-container">
+                            <canvas id="chartAmcContact"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Second Charts Row -->
+                <div class="charts-row">
+                    <!-- CSS Treemap building distribution -->
+                    <div class="chart-card">
+                        <h3 class="editable-element" data-key="chart-building-title">Asset Distribution By Building</h3>
+                        <div class="treemap-container" id="treemapContainer">
+                            <!-- Custom Treemap render area -->
+                        </div>
+                    </div>
+
+                    <!-- OS Distribution Bar -->
+                    <div class="chart-card">
+                        <h3 class="editable-element" data-key="chart-os-title">OS Distribution</h3>
+                        <div class="chart-canvas-container">
+                            <canvas id="chartOs"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Top Vendors Bar -->
+                    <div class="chart-card">
+                        <h3 class="editable-element" data-key="chart-vendor-title">Top Vendors</h3>
+                        <div class="chart-canvas-container">
+                            <canvas id="chartVendor"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Asset Registry Table Section -->
+                <div class="table-section">
+                    <div class="table-header-row">
+                        <h3 class="editable-element" data-key="table-title">IT Asset Details Registry</h3>
+                        <div class="table-actions">
+                            <div class="search-wrapper">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="tableSearch" placeholder="Search registry...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="registry-table-container">
+                        <table class="registry-table">
+                            <thead>
+                                <tr id="tableHeaderRow">
+                                    <!-- Populated dynamically -->
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Table Pagination -->
+                    <div class="pagination-container">
+                        <span id="paginationInfo">Showing 1-10 of 2092 items</span>
+                        <div class="pagination-controls">
+                            <button class="btn-pagination" id="btnPagePrev"><i class="fa-solid fa-chevron-left"></i> Prev</button>
+                            <button class="btn-pagination" id="btnPageNext">Next <i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employees Content Container -->
+            <div class="dashboard-content" id="employees-content" style="display: none;">
+                <!-- Overview Banner -->
+                <div class="dashboard-banner">
+                    <div class="dashboard-banner-text">
+                        <h1>Employee Directory & Records</h1>
+                        <p>Manage employee credentials, designations, and verify attendance records</p>
+                    </div>
+                    <div style="font-size: 40px; opacity: 0.15;">
+                        <i class="fa-solid fa-users-gear"></i>
+                    </div>
+                </div>
+
+                <!-- Add/Search Controls -->
+                <div class="table-section" style="margin-top: 20px;">
+                    <div class="table-header-row">
+                        <h3>Registered Employee List</h3>
+                        <div class="table-actions" style="display: flex; gap: 15px; align-items: center;">
+                            <div class="search-wrapper">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="employeeSearch" placeholder="Search employees...">
+                            </div>
+                            <button class="btn-header-action" id="btnAddEmployee" style="background: var(--theme-color); color: white; border: none; border-radius: 8px; padding: 10px 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-user-plus"></i> Add Employee
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Employee Directory Table -->
+                    <div class="registry-table-container">
+                        <table class="registry-table">
+                            <thead>
+                                <tr>
+                                    <th>Employee ID</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Department</th>
+                                    <th>Designation</th>
+                                    <th>Attendance</th>
+                                    <th style="text-align: center;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employeeTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Log Content Container -->
+            <div class="dashboard-content" id="logs-content" style="display: none;">
+                <!-- Overview Banner -->
+                <div class="dashboard-banner">
+                    <div class="dashboard-banner-text">
+                        <h1>System & Dashboard Activity Logs</h1>
+                        <p>Chronological feed of dashboard configurations, profile updates, and employee modifications</p>
+                    </div>
+                    <div style="font-size: 40px; opacity: 0.15;">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                </div>
+
+                <!-- Activity Log Table -->
+                <div class="table-section" style="margin-top: 20px;">
+                    <div class="table-header-row">
+                        <h3>Dashboard Operations Feed</h3>
+                        <div class="table-actions">
+                            <div class="search-wrapper">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="logSearch" placeholder="Search activity logs...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="registry-table-container">
+                        <table class="registry-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 200px;">Timestamp</th>
+                                    <th style="width: 220px;">Performed By</th>
+                                    <th style="width: 200px;">Action Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+    <!-- Add/Edit Employee Modal -->
+    <div class="modal-overlay" id="employeeModal">
+        <div class="modal-card" style="max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <h3 id="employeeModalTitle">Add New Employee</h3>
+            <form id="employeeForm">
+                <input type="hidden" id="employeeFormMode" value="add">
+                <input type="hidden" id="oldEmail">
+                
+                <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                    <label for="empId" style="font-size: 13px; font-weight: 700; color: #475569;">Employee ID *</label>
+                    <input type="text" id="empId" placeholder="e.g. EMP001" required style="padding: 10px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 14px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                    <label for="empFullName" style="font-size: 13px; font-weight: 700; color: #475569;">Full Name *</label>
+                    <input type="text" id="empFullName" placeholder="e.g. John Doe" required style="padding: 10px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 14px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                    <label for="empEmail" style="font-size: 13px; font-weight: 700; color: #475569;">Email *</label>
+                    <input type="email" id="empEmail" placeholder="e.g. john.doe@nalco.com" required style="padding: 10px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 14px;">
+                </div>
+                <div class="form-group" id="passwordFormGroup" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                    <label for="empPassword" style="font-size: 13px; font-weight: 700; color: #475569;">Password *</label>
+                    <input type="password" id="empPassword" placeholder="Default: Nalco@123" style="padding: 10px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 14px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                    <label for="empRole" style="font-size: 13px; font-weight: 700; color: #475569;">Role *</label>
+                    <select id="empRole" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 14px;">
+                        <option value="Employee">Employee</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                    <label for="empMobile" style="font-size: 13px; font-weight: 700; color: #475569;">Mobile Number *</label>
+                    <input type="text" id="empMobile" placeholder="10-digit mobile" required maxlength="10" style="padding: 10px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 14px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                    <label for="empDepartment" style="font-size: 13px; font-weight: 700; color: #475569;">Department *</label>
+                    <input type="text" id="empDepartment" placeholder="e.g. IT" required style="padding: 10px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 14px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                    <label for="empDesignation" style="font-size: 13px; font-weight: 700; color: #475569;">Designation *</label>
+                    <input type="text" id="empDesignation" placeholder="e.g. Engineer" required style="padding: 10px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 14px;">
+                </div>
+                <div class="form-group" id="attendanceFormGroup" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                    <label for="empAttendance" style="font-size: 13px; font-weight: 700; color: #475569;">Attendance Status</label>
+                    <select id="empAttendance" style="width: 100%; padding: 10px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 14px;">
+                        <option value="Not Marked">Not Marked</option>
+                        <option value="Present">Present</option>
+                        <option value="Absent">Absent</option>
+                        <option value="On Leave">On Leave</option>
+                    </select>
+                </div>
+
+                <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="inline-edit-cancel" id="btnCancelEmployeeModal" style="padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; border: 1.5px solid #cbd5e1; background: #fff;">Cancel</button>
+                    <button type="submit" class="inline-edit-btn" id="btnSubmitEmployeeModal" style="padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; background: var(--theme-color); color: #fff;">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Self Profile Modal -->
+    <div class="modal-overlay" id="selfProfileModal">
+        <div class="modal-card" style="max-width: 450px; width: 90%;">
+            <h3>My Profile Settings</h3>
+            <form id="selfProfileForm">
+                <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                    <label for="selfName" style="font-size: 13px; font-weight: 700; color: #475569;">Full Name *</label>
+                    <input type="text" id="selfName" required style="padding: 10px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 14px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                    <label for="selfMobile" style="font-size: 13px; font-weight: 700; color: #475569;">Mobile Number *</label>
+                    <input type="text" id="selfMobile" required maxlength="10" style="padding: 10px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 14px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                    <label for="selfDept" style="font-size: 13px; font-weight: 700; color: #475569;">Department *</label>
+                    <input type="text" id="selfDept" required style="padding: 10px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 14px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                    <label for="selfDesig" style="font-size: 13px; font-weight: 700; color: #475569;">Designation *</label>
+                    <input type="text" id="selfDesig" required style="padding: 10px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 14px;">
+                </div>
+                <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="inline-edit-cancel" id="btnCancelSelfProfileModal" style="padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; border: 1.5px solid #cbd5e1; background: #fff;">Cancel</button>
+                    <button type="submit" class="inline-edit-btn" id="btnSubmitSelfProfileModal" style="padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; background: var(--theme-color); color: #fff;">Update Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+        </main>
+    </div>
+
+    <!-- Add KPI Modal Dialog -->
+    <div class="modal-overlay" id="addKpiModal">
+        <div class="modal-card">
+            <h3>Create New Metric Card</h3>
+            <div class="form-group">
+                <label for="modalKpiTitle">KPI Label</label>
+                <input type="text" id="modalKpiTitle" placeholder="e.g. Cloud Licences">
+            </div>
+            <div class="form-group">
+                <label for="modalKpiValue">KPI Value</label>
+                <input type="text" id="modalKpiValue" placeholder="e.g. 520">
+            </div>
+            <div class="form-group">
+                <label for="modalKpiFooter">Subtext / Note</label>
+                <input type="text" id="modalKpiFooter" placeholder="e.g. 98% active coverage">
+            </div>
+            <div class="modal-actions">
+                <button class="inline-edit-cancel" id="btnCancelKpiModal">Cancel</button>
+                <button class="inline-edit-btn" id="btnSubmitKpiModal">Create Card</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Processing Loader -->
+    <div class="export-loader" id="exportLoader">
+        <div class="spinner"></div>
+        <span id="exportLoaderText">Generating Dashboard Report...</span>
+    </div>
+
+    <!-- Scripting Logic -->
+    <script src="chatbot.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Session check redirect
+            const token = localStorage.getItem('study_genie_token');
+            const role = localStorage.getItem('study_genie_role') || 'Employee';
+            const employeeName = localStorage.getItem('employeeName') || 'Portal Member';
+            const employeeId = localStorage.getItem('employeeId') || '-';
+
+            if (!token) {
+                alert('Access Denied. Please authenticate first.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Update Header user profile details
+            document.getElementById('hdr-user-name').innerText = employeeName;
+            document.getElementById('hdr-user-empid').innerText = `Employee ID: ${employeeId}`;
+            
+            const rBadge = document.getElementById('hdr-role-badge');
+            rBadge.innerText = role;
+            rBadge.className = `role-badge-premium ${role.toLowerCase()}`;
+
+            const avatarIcon = document.getElementById('hdr-avatar');
+            if (role === 'Admin') {
+                avatarIcon.innerHTML = '<i class="fa-solid fa-user-shield"></i>';
+                document.getElementById('themeSelectorContainer').style.display = 'flex';
+                document.getElementById('exportControls').style.display = 'flex';
+                document.getElementById('btnAddKpiCard').style.display = 'flex';
+            } else if (role === 'Manager') {
+                avatarIcon.innerHTML = '<i class="fa-solid fa-user-tie"></i>';
+            } else {
+                avatarIcon.innerHTML = '<i class="fa-solid fa-user-gear"></i>';
+            }
+
+            // Theme Management
+            let currentTheme = localStorage.getItem('nalco_theme') || 'blue';
+            document.body.className = `theme-${currentTheme}`;
+            document.querySelectorAll('.theme-swatch').forEach(sw => {
+                sw.classList.toggle('active', sw.getAttribute('data-theme') === currentTheme);
+            });
+
+            if (role === 'Admin') {
+                document.querySelectorAll('.theme-swatch').forEach(swatch => {
+                    swatch.addEventListener('click', () => {
+                        const newTheme = swatch.getAttribute('data-theme');
+                        document.body.className = `theme-${newTheme}`;
+                        document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
+                        swatch.classList.add('active');
+                        localStorage.setItem('nalco_theme', newTheme);
+                        currentTheme = newTheme;
+                        updateAllChartsColors();
+                    });
+                });
+            }
+
+            // Logout execution
+            const handleLogout = () => {
+                localStorage.removeItem('study_genie_token');
+                localStorage.removeItem('study_genie_role');
+                localStorage.removeItem('employeeName');
+                localStorage.removeItem('employeeId');
+                window.location.href = 'login.html';
+            };
+            document.getElementById('btnLogout').addEventListener('click', handleLogout);
+
+            // Tab Switching & Employee/Logs Logic
+            const isManagerOrAdmin = role === 'Manager' || role === 'Admin';
+            if (isManagerOrAdmin) {
+                document.getElementById('btnTabEmployees').style.display = 'flex';
+                document.getElementById('btnTabLogs').style.display = 'flex';
+            }
+
+            // Global store for Employees and Logs
+            let employeesList = [];
+            let logsList = [];
+            
+            const getAuthHeaders = () => ({
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            });
+
+            // Load and Render Employees Directory
+            const loadEmployees = async () => {
+                try {
+                    const res = await fetch('http://127.0.0.1:5000/api/employees', {
+                        headers: getAuthHeaders()
+                    });
+                    if (!res.ok) throw new Error('Failed to load employee records');
+                    employeesList = await res.json();
+                    renderEmployeesTable();
+                } catch (err) {
+                    console.error(err);
+                }
+            };
+
+            const renderEmployeesTable = () => {
+                const tbody = document.getElementById('employeeTableBody');
+                tbody.innerHTML = '';
+                
+                const search = document.getElementById('employeeSearch').value.toLowerCase().trim();
+                const filtered = employeesList.filter(emp => 
+                    (emp.full_name || '').toLowerCase().includes(search) ||
+                    (emp.email || '').toLowerCase().includes(search) ||
+                    (emp.employee_id || '').toLowerCase().includes(search) ||
+                    (emp.department || '').toLowerCase().includes(search) ||
+                    (emp.designation || '').toLowerCase().includes(search)
+                );
+                
+                if (filtered.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:#94a3b8;font-weight:700;">No matching employees found</td></tr>`;
+                    return;
+                }
+                
+                filtered.forEach(emp => {
+                    const tr = document.createElement('tr');
+                    const attClass = (emp.attendance_status || 'Not Marked').toLowerCase().replace(' ', '');
+                    
+                    tr.innerHTML = `
+                        <td>${emp.employee_id || '-'}</td>
+                        <td style="font-weight:700;color:#1e293b;">${emp.full_name || 'Portal Member'}</td>
+                        <td>${emp.email}</td>
+                        <td><span class="role-badge-premium ${emp.role.toLowerCase()}">${emp.role}</span></td>
+                        <td>${emp.department || '-'}</td>
+                        <td>${emp.designation || '-'}</td>
+                        <td><span class="status-pill ${attClass}">${emp.attendance_status || 'Not Marked'}</span></td>
+                        <td style="text-align: center;">
+                            <div style="display: flex; gap: 8px; justify-content: center;">
+                                <button class="btn-pagination edit-emp-btn" data-email="${emp.email}" title="Edit Profile" style="padding: 6px 12px; font-size: 12px;">
+                                    <i class="fa-solid fa-user-pen"></i> Edit
+                                </button>
+                                <button class="btn-pagination att-emp-btn" data-email="${emp.email}" title="Mark Attendance" style="padding: 6px 12px; font-size: 12px; border-color: #fbbf24; color: #b45309;">
+                                    <i class="fa-solid fa-calendar-check"></i> Attendance
+                                </button>
+                                ${emp.email !== localStorage.getItem('flowEmail') ? `
+                                <button class="btn-pagination del-emp-btn" data-email="${emp.email}" title="Delete Record" style="padding: 6px 12px; font-size: 12px; border-color: #fca5a5; color: #b91c1c;">
+                                    <i class="fa-solid fa-trash-can"></i> Delete
+                                </button>` : ''}
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                
+                // Attach button listeners
+                tbody.querySelectorAll('.edit-emp-btn').forEach(btn => {
+                    btn.addEventListener('click', () => openEmployeeModal('edit', btn.getAttribute('data-email')));
+                });
+                tbody.querySelectorAll('.att-emp-btn').forEach(btn => {
+                    btn.addEventListener('click', () => openEmployeeModal('attendance', btn.getAttribute('data-email')));
+                });
+                tbody.querySelectorAll('.del-emp-btn').forEach(btn => {
+                    btn.addEventListener('click', () => deleteEmployeeRecord(btn.getAttribute('data-email')));
+                });
+            };
+
+            document.getElementById('employeeSearch').addEventListener('input', renderEmployeesTable);
+
+            // Delete Employee
+            const deleteEmployeeRecord = async (email) => {
+                if (!confirm(`Are you sure you want to delete the employee record for ${email}?`)) return;
+                try {
+                    const res = await fetch(`http://127.0.0.1:5000/api/employees/${email}`, {
+                        method: 'DELETE',
+                        headers: getAuthHeaders()
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || 'Deletion failed');
+                    alert(data.message);
+                    loadEmployees();
+                } catch (err) {
+                    alert(err.message);
+                }
+            };
+
+            // Employee Modal Actions (Add/Edit/Attendance)
+            const empModal = document.getElementById('employeeModal');
+            const empForm = document.getElementById('employeeForm');
+            const empModalTitle = document.getElementById('employeeModalTitle');
+            
+            const openEmployeeModal = (mode, email = null) => {
+                empForm.reset();
+                document.getElementById('employeeFormMode').value = mode;
+                document.getElementById('oldEmail').value = email || '';
+                
+                // Reset standard view visibility
+                document.getElementById('passwordFormGroup').style.display = 'flex';
+                document.getElementById('attendanceFormGroup').style.display = 'none';
+                document.getElementById('empEmail').disabled = false;
+                document.getElementById('empPassword').required = true;
+                
+                // Re-enable input states
+                const fields = ['empId', 'empFullName', 'empRole', 'empMobile', 'empDepartment', 'empDesignation'];
+                fields.forEach(f => document.getElementById(f).disabled = false);
+                
+                if (mode === 'add') {
+                    empModalTitle.innerText = "Add New Employee";
+                } else if (mode === 'edit') {
+                    empModalTitle.innerText = "Edit Employee Details";
+                    document.getElementById('passwordFormGroup').style.display = 'none';
+                    document.getElementById('empEmail').disabled = true;
+                    document.getElementById('empPassword').required = false;
+                    
+                    const emp = employeesList.find(e => e.email === email);
+                    if (emp) {
+                        document.getElementById('empId').value = emp.employee_id || '';
+                        document.getElementById('empFullName').value = emp.full_name || '';
+                        document.getElementById('empEmail').value = emp.email || '';
+                        document.getElementById('empRole').value = emp.role || 'Employee';
+                        document.getElementById('empMobile').value = emp.mobile_number || '';
+                        document.getElementById('empDepartment').value = emp.department || '';
+                        document.getElementById('empDesignation').value = emp.designation || '';
+                    }
+                } else if (mode === 'attendance') {
+                    empModalTitle.innerText = "Modify Attendance Status";
+                    document.getElementById('passwordFormGroup').style.display = 'none';
+                    document.getElementById('empPassword').required = false;
+                    document.getElementById('attendanceFormGroup').style.display = 'flex';
+                    
+                    // Disable non-attendance fields
+                    fields.forEach(f => document.getElementById(f).disabled = true);
+                    document.getElementById('empEmail').disabled = true;
+                    
+                    const emp = employeesList.find(e => e.email === email);
+                    if (emp) {
+                        document.getElementById('empId').value = emp.employee_id || '';
+                        document.getElementById('empFullName').value = emp.full_name || '';
+                        document.getElementById('empEmail').value = emp.email || '';
+                        document.getElementById('empRole').value = emp.role || 'Employee';
+                        document.getElementById('empMobile').value = emp.mobile_number || '';
+                        document.getElementById('empDepartment').value = emp.department || '';
+                        document.getElementById('empDesignation').value = emp.designation || '';
+                        document.getElementById('empAttendance').value = emp.attendance_status || 'Not Marked';
+                    }
+                }
+                empModal.style.display = 'flex';
+            };
+
+            document.getElementById('btnAddEmployee').addEventListener('click', () => openEmployeeModal('add'));
+            document.getElementById('btnCancelEmployeeModal').addEventListener('click', () => {
+                empModal.style.display = 'none';
+            });
+
+            empForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const mode = document.getElementById('employeeFormMode').value;
+                const oldEmail = document.getElementById('oldEmail').value;
+                
+                const payload = {
+                    employeeId: document.getElementById('empId').value,
+                    fullName: document.getElementById('empFullName').value,
+                    email: document.getElementById('empEmail').value,
+                    role: document.getElementById('empRole').value,
+                    mobileNumber: document.getElementById('empMobile').value,
+                    department: document.getElementById('empDepartment').value,
+                    designation: document.getElementById('empDesignation').value
+                };
+                
+                let url = 'http://127.0.0.1:5000/api/employees';
+                let method = 'POST';
+                
+                if (mode === 'add') {
+                    payload.password = document.getElementById('empPassword').value || 'Nalco@123';
+                } else {
+                    url = `http://127.0.0.1:5000/api/employees/${oldEmail}`;
+                    method = 'PUT';
+                    if (mode === 'attendance') {
+                        payload.attendanceStatus = document.getElementById('empAttendance').value;
+                    } else {
+                        const emp = employeesList.find(e => e.email === oldEmail);
+                        payload.attendanceStatus = emp ? (emp.attendance_status || 'Not Marked') : 'Not Marked';
+                    }
+                }
+                
+                try {
+                    const res = await fetch(url, {
+                        method,
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || 'Operation failed');
+                    
+                    alert(data.message);
+                    empModal.style.display = 'none';
+                    loadEmployees();
+                } catch (err) {
+                    alert(err.message);
+                }
+            });
+
+            // Load and Render Activity Logs
+            const loadLogs = async () => {
+                try {
+                    const res = await fetch('http://127.0.0.1:5000/api/activity_logs', {
+                        headers: getAuthHeaders()
+                    });
+                    if (!res.ok) throw new Error('Failed to load logs');
+                    logsList = await res.json();
+                    renderLogsTable();
+                } catch (err) {
+                    console.error(err);
+                }
+            };
+
+            const renderLogsTable = () => {
+                const tbody = document.getElementById('logTableBody');
+                tbody.innerHTML = '';
+                
+                const search = document.getElementById('logSearch').value.toLowerCase().trim();
+                const filtered = logsList.filter(log => 
+                    (log.user_email || '').toLowerCase().includes(search) ||
+                    (log.action_type || '').toLowerCase().includes(search) ||
+                    (log.description || '').toLowerCase().includes(search) ||
+                    (log.timestamp || '').toLowerCase().includes(search)
+                );
+                
+                if (filtered.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;font-weight:700;">No activity logs recorded yet</td></tr>`;
+                    return;
+                }
+                
+                filtered.forEach(log => {
+                    const tr = document.createElement('tr');
+                    const date = new Date(log.timestamp);
+                    const formattedDate = date.toLocaleString();
+                    
+                    tr.innerHTML = `
+                        <td style="color: #64748b; font-weight: 500;">${formattedDate}</td>
+                        <td style="font-weight: 700; color: #1e293b;">${log.user_email}</td>
+                        <td><span class="status-pill none" style="font-weight: 700; font-size: 11px;">${log.action_type}</span></td>
+                        <td style="color: #475569;">${log.description}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            };
+
+            document.getElementById('logSearch').addEventListener('input', renderLogsTable);
+
+            // Tab Switching Logic
+            const switchTab = (tabId) => {
+                document.querySelectorAll('.nav-tab-btn').forEach(btn => btn.classList.remove('active'));
+                
+                document.getElementById('dashboard-content').style.display = 'none';
+                document.getElementById('employees-content').style.display = 'none';
+                document.getElementById('logs-content').style.display = 'none';
+                document.getElementById('sidebarFiltersContainer').style.display = 'none';
+                
+                if (tabId === 'dashboard') {
+                    document.getElementById('btnTabDashboard').classList.add('active');
+                    document.getElementById('dashboard-content').style.display = 'block';
+                    document.getElementById('sidebarFiltersContainer').style.display = 'block';
+                } else if (tabId === 'employees') {
+                    document.getElementById('btnTabEmployees').classList.add('active');
+                    document.getElementById('employees-content').style.display = 'block';
+                    loadEmployees();
+                } else if (tabId === 'logs') {
+                    document.getElementById('btnTabLogs').classList.add('active');
+                    document.getElementById('logs-content').style.display = 'block';
+                    loadLogs();
+                }
+            };
+
+            document.getElementById('btnTabDashboard').addEventListener('click', () => switchTab('dashboard'));
+            if (isManagerOrAdmin) {
+                document.getElementById('btnTabEmployees').addEventListener('click', () => switchTab('employees'));
+                document.getElementById('btnTabLogs').addEventListener('click', () => switchTab('logs'));
+            }
+
+            // Self Profile Update logic
+            const selfProfileModal = document.getElementById('selfProfileModal');
+            const selfProfileForm = document.getElementById('selfProfileForm');
+            const userIdentityBtn = document.querySelector('.user-identity');
+            
+            if (userIdentityBtn) {
+                userIdentityBtn.classList.add('clickable-profile');
+                userIdentityBtn.addEventListener('click', async () => {
+                    try {
+                        const res = await fetch('http://127.0.0.1:5000/api/user/profile', {
+                            headers: getAuthHeaders()
+                        });
+                        if (!res.ok) throw new Error('Failed to load profile data');
+                        const u = await res.json();
+                        
+                        document.getElementById('selfName').value = u.full_name || '';
+                        document.getElementById('selfMobile').value = u.mobile_number || '';
+                        document.getElementById('selfDept').value = u.department || '';
+                        document.getElementById('selfDesig').value = u.designation || '';
+                        
+                        selfProfileModal.style.display = 'flex';
+                    } catch (err) {
+                        alert(err.message);
+                    }
+                });
+            }
+
+            document.getElementById('btnCancelSelfProfileModal').addEventListener('click', () => {
+                selfProfileModal.style.display = 'none';
+            });
+
+            selfProfileForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const payload = {
+                    fullName: document.getElementById('selfName').value,
+                    mobileNumber: document.getElementById('selfMobile').value,
+                    department: document.getElementById('selfDept').value,
+                    designation: document.getElementById('selfDesig').value
+                };
+                
+                try {
+                    const res = await fetch('http://127.0.0.1:5000/api/user/profile', {
+                        method: 'PUT',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(payload)
+                    });
+                    const d = await res.json();
+                    if (!res.ok) throw new Error(d.message || 'Profile update failed');
+                    
+                    alert(d.message);
+                    localStorage.setItem('employeeName', payload.fullName);
+                    document.getElementById('hdr-user-name').innerText = payload.fullName;
+                    
+                    selfProfileModal.style.display = 'none';
+                } catch (err) {
+                    alert(err.message);
+                }
+            });
+
+            // 2. Customizations store logic (Text items, inline editing)
+            let customizations = JSON.parse(localStorage.getItem('nalco_customizations')) || {
+                texts: {},
+                kpis: [
+                    { id: 'kpi-assets', label: 'Total Assets', value: '2092', footer: 'All Categories', footerClass: 'neutral' },
+                    { id: 'kpi-amc', label: 'AMC Actives', value: '2.092K', footer: '67% covered', footerClass: '' },
+                    { id: 'kpi-warranty', label: 'In Warranty', value: '106', footer: 'Only 5% active', footerClass: '' },
+                    { id: 'kpi-po', label: 'Total PO Value (Rs)', value: '105M', footer: 'Procurement Spend', footerClass: 'neutral' }
+                ],
+                tableHeaders: ["Asset ID", "Asset Name", "Building", "Category", "Vendor", "OS", "Warranty Status", "AMC Status", "PO Value"]
+            };
+
+            const saveCustomizations = () => {
+                localStorage.setItem('nalco_customizations', JSON.stringify(customizations));
+            };
+
+            // Dynamic Asset Data Generation based on PDF exact ratios
+            const rawAssets = generateAssetData();
+
+            // Set up active filters states
+            let activeFilters = {
+                building: null,
+                warranty: null,
+                category: null,
+                amc: null
+            };
+
+            // Table States
+            let tableSearchQuery = '';
+            let tableSortColumn = 0; // index of column
+            let tableSortAsc = true;
+            let tableCurrentPage = 1;
+            const tableRowsPerPage = 10;
+
+            // Global references to Chart.js instances
+            let charts = {};
+
+            // 3. Render and initialize functions
+            const getThemeColors = () => {
+                if (currentTheme === 'green') {
+                    return { primary: '#0f766e', accent: '#14b8a6', hover: '#115e59', palette: ['#0f766e', '#14b8a6', '#0d9488', '#2dd4bf', '#5eead4'] };
+                } else if (currentTheme === 'amber') {
+                    return { primary: '#b45309', accent: '#f59e0b', hover: '#92400e', palette: ['#b45309', '#f59e0b', '#d97706', '#fbbf24', '#fcd34d'] };
+                } else { // default blue
+                    return { primary: '#1e3a8a', accent: '#3b82f6', hover: '#172554', palette: ['#1e3a8a', '#3b82f6', '#2563eb', '#60a5fa', '#93c5fd'] };
+                }
+            };
+
+            // Filter button trigger count rendering
+            const getCounts = (filterType, val) => {
+                let filtered = rawAssets.filter(item => {
+                    if (filterType !== 'building' && activeFilters.building && item.building !== activeFilters.building) return false;
+                    if (filterType !== 'warranty' && activeFilters.warranty && item.warranty !== activeFilters.warranty) return false;
+                    if (filterType !== 'category' && activeFilters.category && item.category !== activeFilters.category) return false;
+                    if (filterType !== 'amc' && activeFilters.amc && item.amc !== activeFilters.amc) return false;
+                    return true;
+                });
+                if (val === 'ALL') return filtered.length;
+                return filtered.filter(item => {
+                    if (filterType === 'building') return item.building === val;
+                    if (filterType === 'warranty') return item.warranty === val;
+                    if (filterType === 'category') return item.category === val;
+                    if (filterType === 'amc') return item.amc === val;
+                    return true;
+                }).length;
+            };
+
+            // Load filters sidebar lists
+            const initFilters = () => {
+                // Buildings: ADMIN BUILDING, SYSTEMS, DPS, SVM, PLANT OFFICE, HOSPITAL, PROJECT, TRAINING, PLANT, OTHER
+                const buildings = ['ADMIN BUILDING', 'SYSTEMS', 'DPS', 'SVM', 'PLANT OFFICE', 'HOSPITAL', 'PROJECT', 'TRAINING', 'PLANT', 'OTHER'];
+                renderFilterGroup('building', buildings, 'filter-building-group');
+
+                // Warranty Status: N (None), Y (Active)
+                const warranties = ['N (None)', 'Y (Active)'];
+                renderFilterGroup('warranty', warranties, 'filter-warranty-group');
+
+                // Categories: PCS, Other, DMP, SCS, CLM
+                const categories = ['PCS', 'Other', 'DMP', 'SCS', 'CLM'];
+                renderFilterGroup('category', categories, 'filter-category-group');
+
+                // AMC Status: Blank, Active, Expired
+                const amcStatuses = ['Blank', 'Active', 'Expired'];
+                renderFilterGroup('amc', amcStatuses, 'filter-amc-group');
+            };
+
+            const renderFilterGroup = (type, list, containerId) => {
+                const container = document.getElementById(containerId);
+                container.innerHTML = '';
+                list.forEach(val => {
+                    const btn = document.createElement('button');
+                    btn.className = 'filter-btn';
+                    if (activeFilters[type] === val) btn.classList.add('active');
+                    
+                    const count = getCounts(type, val);
+                    
+                    btn.innerHTML = `
+                        <span>${val}</span>
+                        <span class="badge">${count}</span>
+                    `;
+                    btn.addEventListener('click', () => {
+                        if (activeFilters[type] === val) {
+                            activeFilters[type] = null;
+                        } else {
+                            activeFilters[type] = val;
+                        }
+                        updateDashboard();
+                    });
+                    container.appendChild(btn);
+                });
+            };
+
+            // Update entire Dashboard state dynamically
+            const updateDashboard = () => {
+                // 1. Filter raw assets
+                const filteredAssets = rawAssets.filter(item => {
+                    if (activeFilters.building && item.building !== activeFilters.building) return false;
+                    if (activeFilters.warranty && item.warranty !== activeFilters.warranty) return false;
+                    if (activeFilters.category && item.category !== activeFilters.category) return false;
+                    if (activeFilters.amc && item.amc !== activeFilters.amc) return false;
+                    return true;
+                });
+
+                // 2. Refresh filter list badges
+                initFilters();
+
+                // 3. Recalculate and render KPI values dynamically
+                updateKpis(filteredAssets);
+
+                // 4. Render charts with filtered data
+                updateCharts(filteredAssets);
+
+                // 5. Render Treemap
+                updateTreemap(filteredAssets);
+
+                // 6. Render registry table
+                updateTable(filteredAssets);
+            };
+
+            const updateKpis = (assets) => {
+                const totalAssets = assets.length;
+                const amcActivesCount = assets.filter(i => i.amc === 'Active').length;
+                const inWarrantyCount = assets.filter(i => i.warranty === 'Y (Active)').length;
+                const totalPoValueSum = assets.reduce((sum, item) => sum + item.poValue, 0);
+
+                const amcCoverage = totalAssets > 0 ? Math.round((amcActivesCount / totalAssets) * 100) : 0;
+                const warrantyPercentage = totalAssets > 0 ? Math.round((inWarrantyCount / totalAssets) * 100) : 0;
+
+                // Format PO value in Millions (M) or Thousands (K)
+                let poFormatted = "0";
+                if (totalPoValueSum >= 1000000) {
+                    poFormatted = (totalPoValueSum / 1000000).toFixed(1) + 'M';
+                } else if (totalPoValueSum >= 1000) {
+                    poFormatted = Math.round(totalPoValueSum / 1000) + 'K';
+                } else {
+                    poFormatted = totalPoValueSum.toString();
+                }
+
+                // Format AMC Actives in thousands if needed
+                let amcFormatted = amcActivesCount.toString();
+                if (amcActivesCount >= 1000) {
+                    amcFormatted = (amcActivesCount / 1000).toFixed(3) + 'K';
+                }
+
+                // Format numbers to matching localized strings
+                customizations.kpis.forEach(kpi => {
+                    if (kpi.id === 'kpi-assets') {
+                        kpi.value = totalAssets;
+                    } else if (kpi.id === 'kpi-amc') {
+                        kpi.value = amcFormatted;
+                        kpi.footer = `${amcCoverage}% covered`;
+                    } else if (kpi.id === 'kpi-warranty') {
+                        kpi.value = inWarrantyCount;
+                        kpi.footer = `Only ${warrantyPercentage}% active`;
+                    } else if (kpi.id === 'kpi-po') {
+                        kpi.value = poFormatted;
+                    }
+                });
+
+                renderKpiCards();
+            };
+
+            const renderKpiCards = () => {
+                const container = document.getElementById('kpiGridContainer');
+                container.innerHTML = '';
+                
+                customizations.kpis.forEach((kpi, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'kpi-card';
+                    card.innerHTML = `
+                        <div>
+                            <div class="kpi-card-header editable-text" data-type="kpi-label" data-index="${index}">${kpi.label}</div>
+                            <div class="kpi-card-value editable-text" data-type="kpi-value" data-index="${index}">${kpi.value}</div>
+                        </div>
+                        <div class="kpi-card-footer ${kpi.footerClass || ''}">
+                            <span class="editable-text" data-type="kpi-footer" data-index="${index}">${kpi.footer}</span>
+                        </div>
+                    `;
+                    
+                    if (role === 'Admin') {
+                        const delBtn = document.createElement('button');
+                        delBtn.className = 'kpi-delete-btn';
+                        delBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+                        delBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            customizations.kpis.splice(index, 1);
+                            saveCustomizations();
+                            updateDashboard();
+                        });
+                        card.appendChild(delBtn);
+                    }
+
+                    container.appendChild(card);
+                });
+                
+                setupInlineEditableElements();
+            };
+
+            // squarified HTML treemap dynamic render
+            const updateTreemap = (assets) => {
+                const container = document.getElementById('treemapContainer');
+                container.innerHTML = '';
+
+                // Calculate distribution of active data across buildings
+                const buildingCounts = {};
+                const buildings = ['ADMIN BUILDING', 'SYSTEMS', 'DPS', 'SVM', 'PLANT OFFICE', 'HOSPITAL', 'PROJECT', 'TRAINING', 'PLANT', 'OTHER'];
+                buildings.forEach(b => buildingCounts[b] = 0);
+                
+                assets.forEach(item => {
+                    if (buildingCounts[item.building] !== undefined) {
+                        buildingCounts[item.building]++;
+                    }
+                });
+
+                // Filter out buildings with 0 counts to prevent rendering tiny empty divs
+                const treemapData = Object.keys(buildingCounts)
+                    .map(key => ({ name: key, value: buildingCounts[key] }))
+                    .filter(item => item.value > 0)
+                    .sort((a, b) => b.value - a.value);
+
+                if (treemapData.length === 0) {
+                    container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-weight:700;color:#94a3b8;">No matching assets for building layout</div>';
+                    return;
+                }
+
+                // Recursively layout nodes inside treemap
+                layoutTreemap(treemapData, 0, 0, 100, 100, container);
+            };
+
+            const getBuildingColor = (name) => {
+                const colors = getThemeColors();
+                const palette = colors.palette;
+                const index = Math.abs(hashCode(name)) % palette.length;
+                return palette[index];
+            };
+
+            function hashCode(str) {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                return hash;
+            }
+
+            // 4. Chart Renderings via Chart.js
+            const updateCharts = (assets) => {
+                const colors = getThemeColors();
+
+                // Chart 1: Category Count
+                const categories = ['PCS', 'Other', 'DMP', 'SCS', 'CLM'];
+                const categoryCounts = categories.map(cat => assets.filter(a => a.category === cat).length);
+                renderHorizontalBarChart('chartCategory', categories, categoryCounts, 'Count of Asset_cd', colors.primary);
+
+                // Chart 2: Warranty Status Donut
+                const warranties = ['N (None)', 'Y (Active)'];
+                const warrantyCounts = warranties.map(war => assets.filter(a => a.warranty === war).length);
+                renderDonutChart('chartWarranty', warranties, warrantyCounts, ['#dc2626', '#16a34a']);
+
+                // Chart 3: AMC Status Donut
+                const amcKeys = ['Active', 'Expired', 'Blank'];
+                const amcCounts = amcKeys.map(k => assets.filter(a => a.amc === k).length);
+                renderDonutChart('chartAmcContact', amcKeys, amcCounts, [colors.primary, '#f59e0b', '#cbd5e1']);
+
+                // Chart 4: OS Distribution Bar
+                const osList = ['Win 10', 'Win 7', 'Other', 'Server', 'Win 11'];
+                const osCounts = osList.map(os => assets.filter(a => a.os === os).length);
+                renderHorizontalBarChart('chartOs', osList, osCounts, 'Count of Asset_cd', colors.primary);
+
+                // Chart 5: Top Vendors Bar
+                const vendors = ['HP', 'Acer', 'DELL', 'LENOVO', 'Epson', 'ZECONS'];
+                const vendorCounts = vendors.map(v => assets.filter(a => a.vendor === v).length);
+                renderHorizontalBarChart('chartVendor', vendors, vendorCounts, 'Count of make', colors.accent);
+            };
+
+            const renderHorizontalBarChart = (canvasId, labels, data, datasetLabel, barColor) => {
+                if (charts[canvasId]) charts[canvasId].destroy();
+                
+                const ctx = document.getElementById(canvasId).getContext('2d');
+                charts[canvasId] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: datasetLabel,
+                            data: data,
+                            backgroundColor: barColor,
+                            borderRadius: 4,
+                            barThickness: 15
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { padding: 10 }
+                        },
+                        scales: {
+                            x: {
+                                grid: { drawBorder: false, color: '#f1f5f9' },
+                                ticks: { font: { family: 'Plus Jakarta Sans', size: 10 } }
+                            },
+                            y: {
+                                grid: { display: false },
+                                ticks: { font: { family: 'Plus Jakarta Sans', size: 10, weight: 700 } }
+                            }
+                        }
+                    }
+                });
+            };
+
+            const renderDonutChart = (canvasId, labels, data, sliceColors) => {
+                if (charts[canvasId]) charts[canvasId].destroy();
+                
+                // Calculate percentage strings for tooltips
+                const total = data.reduce((a, b) => a + b, 0);
+
+                const ctx = document.getElementById(canvasId).getContext('2d');
+                charts[canvasId] = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: sliceColors,
+                            borderWidth: 2,
+                            borderColor: '#ffffff',
+                            hoverOffset: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    font: { family: 'Plus Jakarta Sans', size: 10, weight: 600 },
+                                    padding: 12,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw;
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(2) + '%' : '0%';
+                                        // format values > 1000 to matching decimal representation
+                                        let valStr = value.toString();
+                                        if (value >= 1000) {
+                                            valStr = (value / 1000).toFixed(2) + 'K';
+                                        }
+                                        return ` ${context.label}: ${valStr} (${percentage})`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
+            const updateAllChartsColors = () => {
+                updateDashboard();
+            };
+
+            // 5. Table operations
+            const updateTable = (assets) => {
+                // Apply search filter
+                let query = tableSearchQuery.toLowerCase().trim();
+                let filtered = assets.filter(item => {
+                    return item.id.toLowerCase().includes(query) ||
+                           item.name.toLowerCase().includes(query) ||
+                           item.building.toLowerCase().includes(query) ||
+                           item.category.toLowerCase().includes(query) ||
+                           item.vendor.toLowerCase().includes(query) ||
+                           item.os.toLowerCase().includes(query);
+                });
+
+                // Apply sorting
+                filtered.sort((a, b) => {
+                    let aVal = getAssetSortVal(a, tableSortColumn);
+                    let bVal = getAssetSortVal(b, tableSortColumn);
+                    
+                    if (typeof aVal === 'string') {
+                        return tableSortAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                    } else {
+                        return tableSortAsc ? aVal - bVal : bVal - aVal;
+                    }
+                });
+
+                // Pagination counts
+                const totalRecords = filtered.length;
+                const totalPages = Math.max(1, Math.ceil(totalRecords / tableRowsPerPage));
+                if (tableCurrentPage > totalPages) tableCurrentPage = totalPages;
+
+                const startIdx = (tableCurrentPage - 1) * tableRowsPerPage;
+                const endIdx = Math.min(startIdx + tableRowsPerPage, totalRecords);
+                const paginated = filtered.slice(startIdx, endIdx);
+
+                // Render Table Headers with inline edit wrappers
+                const headerRow = document.getElementById('tableHeaderRow');
+                headerRow.innerHTML = '';
+                customizations.tableHeaders.forEach((header, index) => {
+                    const th = document.createElement('th');
+                    th.innerHTML = `<span class="editable-text" data-type="table-header" data-index="${index}">${header}</span>`;
+                    th.addEventListener('click', (e) => {
+                        // Click target should not be input editing
+                        if (e.target.closest('.inline-edit-form')) return;
+                        
+                        if (tableSortColumn === index) {
+                            tableSortAsc = !tableSortAsc;
+                        } else {
+                            tableSortColumn = index;
+                            tableSortAsc = true;
+                        }
+                        updateTable(assets);
+                    });
+                    headerRow.appendChild(th);
+                });
+
+                // Render rows
+                const body = document.getElementById('tableBody');
+                body.innerHTML = '';
+
+                if (paginated.length === 0) {
+                    body.innerHTML = `<tr><td colspan="${customizations.tableHeaders.length}" style="text-align:center;padding:30px;color:#94a3b8;font-weight:700;">No matching registry items found</td></tr>`;
+                } else {
+                    paginated.forEach(item => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${item.id}</td>
+                            <td style="font-weight:700;color:#1e293b;">${item.name}</td>
+                            <td>${item.building}</td>
+                            <td><span class="status-pill none">${item.category}</span></td>
+                            <td>${item.vendor}</td>
+                            <td>${item.os}</td>
+                            <td><span class="status-pill ${item.warranty.includes('Active') ? 'active' : 'expired'}">${item.warranty}</span></td>
+                            <td><span class="status-pill ${item.amc === 'Active' ? 'active' : item.amc === 'Expired' ? 'expired' : 'none'}">${item.amc}</span></td>
+                            <td class="po-value-cell">₹${item.poValue.toLocaleString('en-IN')}</td>
+                        `;
+                        body.appendChild(tr);
+                    });
+                }
+
+                // Update pagination status strings
+                document.getElementById('paginationInfo').innerText = totalRecords > 0 
+                    ? `Showing ${startIdx + 1}-${endIdx} of ${totalRecords} items`
+                    : 'Showing 0-0 of 0 items';
+
+                document.getElementById('btnPagePrev').disabled = tableCurrentPage === 1;
+                document.getElementById('btnPageNext').disabled = tableCurrentPage === totalPages;
+
+                // Re-enable inline edit listeners
+                setupInlineEditableElements();
+            };
+
+            const getAssetSortVal = (asset, colIndex) => {
+                switch(colIndex) {
+                    case 0: return asset.id;
+                    case 1: return asset.name;
+                    case 2: return asset.building;
+                    case 3: return asset.category;
+                    case 4: return asset.vendor;
+                    case 5: return asset.os;
+                    case 6: return asset.warranty;
+                    case 7: return asset.amc;
+                    case 8: return asset.poValue;
+                    default: return '';
+                }
+            };
+
+            // Search Listener
+            document.getElementById('tableSearch').addEventListener('input', (e) => {
+                tableSearchQuery = e.target.value;
+                tableCurrentPage = 1;
+                updateDashboard();
+            });
+
+            // Pagination button events
+            document.getElementById('btnPagePrev').addEventListener('click', () => {
+                if (tableCurrentPage > 1) {
+                    tableCurrentPage--;
+                    updateDashboard();
+                }
+            });
+            document.getElementById('btnPageNext').addEventListener('click', () => {
+                tableCurrentPage++;
+                updateDashboard();
+            });
+
+            // 6. Inline editing mechanism (Manager + Admin)
+            const setupInlineEditableElements = () => {
+                const canEdit = (role === 'Admin' || role === 'Manager');
+                if (!canEdit) return;
+
+                const editables = document.querySelectorAll('.editable-element, .editable-text');
+                editables.forEach(el => {
+                    // Check if already initialized to avoid duplicate hooks
+                    if (el.querySelector('.edit-pencil') || el.classList.contains('editing-active')) return;
+
+                    // Manager vs Admin permissions constraint check
+                    const key = el.getAttribute('data-key');
+                    const type = el.getAttribute('data-type');
+                    
+                    let permissionOk = false;
+                    if (role === 'Admin') {
+                        permissionOk = true; // Admin edits anything
+                    } else if (role === 'Manager') {
+                        // Manager can edit chart titles, KPI labels, and table headings
+                        if (type === 'table-header') permissionOk = true;
+                        if (type === 'kpi-label') permissionOk = true;
+                        if (key && (key.startsWith('chart-') || key.startsWith('table-'))) permissionOk = true;
+                    }
+
+                    if (!permissionOk) return;
+
+                    el.classList.add('editable');
+                    const pencil = document.createElement('i');
+                    pencil.className = 'fa-solid fa-pencil edit-pencil';
+                    el.appendChild(pencil);
+
+                    el.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (el.classList.contains('editing-active')) return;
+                        
+                        startInlineEdit(el, key, type);
+                    });
+                });
+            };
+
+            const startInlineEdit = (el, key, type) => {
+                el.classList.add('editing-active');
+                
+                // Get clean text value before rendering input (strip pencil markup)
+                const pencil = el.querySelector('.edit-pencil');
+                if (pencil) pencil.remove();
+                
+                const originalText = el.innerText.trim();
+                const index = el.getAttribute('data-index');
+
+                el.innerHTML = '';
+                const form = document.createElement('form');
+                form.className = 'inline-edit-form';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'inline-edit-input';
+                input.value = originalText;
+                form.appendChild(input);
+
+                const saveBtn = document.createElement('button');
+                saveBtn.type = 'submit';
+                saveBtn.className = 'inline-edit-btn';
+                saveBtn.innerHTML = '<i class="fa-solid fa-check"></i>';
+                form.appendChild(saveBtn);
+
+                const cancelBtn = document.createElement('button');
+                cancelBtn.type = 'button';
+                cancelBtn.className = 'inline-edit-cancel';
+                cancelBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                form.appendChild(cancelBtn);
+
+                el.appendChild(form);
+                input.focus();
+                input.select();
+
+                const finishEdit = (save) => {
+                    el.classList.remove('editing-active');
+                    let finalVal = save ? input.value.trim() : originalText;
+                    if (!finalVal) finalVal = originalText;
+
+                    if (save && finalVal !== originalText) {
+                        // Persist custom edit values to localStorage
+                        if (key) {
+                            // Editable elements mapped by key (e.g. main titles, chart titles)
+                            customizations.texts[key] = finalVal;
+                        } else if (type === 'table-header') {
+                            customizations.tableHeaders[parseInt(index)] = finalVal;
+                        } else if (type === 'kpi-label') {
+                            customizations.kpis[parseInt(index)].label = finalVal;
+                        } else if (type === 'kpi-value') {
+                            customizations.kpis[parseInt(index)].value = finalVal;
+                        } else if (type === 'kpi-footer') {
+                            customizations.kpis[parseInt(index)].footer = finalVal;
+                        }
+                        saveCustomizations();
+                    }
+
+                    // Re-render item text
+                    el.innerHTML = finalVal;
+                    
+                    // Re-setup pencil wrapper
+                    setupInlineEditableElements();
+                    
+                    // If table header or chart title changed, we might need to redraw table/charts
+                    if (save && (type === 'table-header' || type === 'kpi-label' || type === 'kpi-value' || type === 'kpi-footer')) {
+                        updateDashboard();
+                    }
+                };
+
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    finishEdit(true);
+                });
+
+                cancelBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    finishEdit(false);
+                });
+
+                // Auto cancel on document click
+                const outerClickListener = (e) => {
+                    if (!el.contains(e.target)) {
+                        finishEdit(true); // save on blur
+                        document.removeEventListener('click', outerClickListener);
+                    }
+                };
+                setTimeout(() => document.addEventListener('click', outerClickListener), 50);
+            };
+
+            // Apply pre-saved customizations to static components
+            const applyStaticCustomizations = () => {
+                Object.keys(customizations.texts).forEach(key => {
+                    const el = document.querySelector(`[data-key="${key}"]`);
+                    if (el) {
+                        el.innerText = customizations.texts[key];
+                    }
+                });
+            };
+
+            // 7. Add KPI Card Actions (Admin only)
+            if (role === 'Admin') {
+                const addKpiBtn = document.getElementById('btnAddKpiCard');
+                const modal = document.getElementById('addKpiModal');
+                
+                addKpiBtn.addEventListener('click', () => {
+                    modal.style.display = 'flex';
+                });
+
+                document.getElementById('btnCancelKpiModal').addEventListener('click', () => {
+                    modal.style.display = 'none';
+                    clearModalInputs();
+                });
+
+                document.getElementById('btnSubmitKpiModal').addEventListener('click', () => {
+                    const label = document.getElementById('modalKpiTitle').value.trim();
+                    const value = document.getElementById('modalKpiValue').value.trim();
+                    const footer = document.getElementById('modalKpiFooter').value.trim();
+
+                    if (!label || !value) {
+                        alert('Label and Value are required!');
+                        return;
+                    }
+
+                    const newKpi = {
+                        id: 'kpi-custom-' + Date.now(),
+                        label: label,
+                        value: value,
+                        footer: footer || 'Active metric',
+                        footerClass: 'neutral'
+                    };
+
+                    customizations.kpis.push(newKpi);
+                    saveCustomizations();
+                    modal.style.display = 'none';
+                    clearModalInputs();
+                    updateDashboard();
+                });
+
+                const clearModalInputs = () => {
+                    document.getElementById('modalKpiTitle').value = '';
+                    document.getElementById('modalKpiValue').value = '';
+                    document.getElementById('modalKpiFooter').value = '';
+                };
+            }
+
+            // 8. PDF/PNG Export functionality (Admin only)
+            if (role === 'Admin') {
+                const loader = document.getElementById('exportLoader');
+                const loaderText = document.getElementById('exportLoaderText');
+
+                const showLoader = (text) => {
+                    loaderText.innerText = text;
+                    loader.style.display = 'flex';
+                };
+
+                const hideLoader = () => {
+                    loader.style.display = 'none';
+                };
+
+                // Export PNG
+                document.getElementById('btnExportPNG').addEventListener('click', () => {
+                    showLoader('Rendering Dashboard Image...');
+                    
+                    // Select content layout element to export
+                    const target = document.getElementById('dashboard-content');
+                    
+                    html2canvas(target, {
+                        scale: 2,
+                        backgroundColor: '#f8fafc',
+                        useCORS: true,
+                        logging: false
+                    }).then(canvas => {
+                        const link = document.createElement('a');
+                        link.download = `NALCO-IT-Asset-Dashboard-${Date.now()}.png`;
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                        hideLoader();
+                    }).catch(err => {
+                        hideLoader();
+                        alert('Image capture failed: ' + err.message);
+                    });
+                });
+
+                // Export PDF
+                document.getElementById('btnExportPDF').addEventListener('click', () => {
+                    showLoader('Assembling PDF Documents...');
+                    
+                    const target = document.getElementById('dashboard-content');
+                    
+                    html2canvas(target, {
+                        scale: 2,
+                        backgroundColor: '#f8fafc',
+                        useCORS: true,
+                        logging: false
+                    }).then(canvas => {
+                        const { jsPDF } = window.jspdf;
+                        
+                        // Create A4 Landscape PDF
+                        const pdf = new jsPDF({
+                            orientation: 'landscape',
+                            unit: 'mm',
+                            format: 'a4'
+                        });
+
+                        const imgData = canvas.toDataURL('image/png');
+                        const imgWidth = 277; // A4 horizontal padding width (297 - 20 margin)
+                        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                        
+                        pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+                        pdf.save(`NALCO-Asset-Report-${Date.now()}.pdf`);
+                        hideLoader();
+                    }).catch(err => {
+                        hideLoader();
+                        alert('PDF generation failed: ' + err.message);
+                    });
+                });
+            }
+
+            // Clear filters button trigger
+            document.getElementById('btnClearFilters').addEventListener('click', () => {
+                activeFilters = { building: null, warranty: null, category: null, amc: null };
+                updateDashboard();
+            });
+
+            // Initialize on start
+            applyStaticCustomizations();
+            updateDashboard();
+        });
+
+        // 9. squarified HTML treemap dynamic calculator engine
+        function layoutTreemap(nodes, x, y, w, h, container) {
+            if (nodes.length === 0) return;
+            if (nodes.length === 1) {
+                createRect(nodes[0], x, y, w, h, container);
+                return;
+            }
+            // Sum total
+            const sum = nodes.reduce((a, b) => a + b.value, 0);
+            
+            // Find division point index (roughly split into half)
+            let currentSum = 0;
+            let splitIdx = 0;
+            for (let i = 0; i < nodes.length - 1; i++) {
+                currentSum += nodes[i].value;
+                if (currentSum >= sum / 2) {
+                    splitIdx = i;
+                    break;
+                }
+            }
+            if (splitIdx === 0) splitIdx = 1; // force at least 1 node split
+            
+            const leftNodes = nodes.slice(0, splitIdx);
+            const rightNodes = nodes.slice(splitIdx);
+            const leftSum = leftNodes.reduce((a, b) => a + b.value, 0);
+            
+            const horizontal = w > h;
+            if (horizontal) {
+                const leftW = w * (leftSum / sum);
+                layoutTreemap(leftNodes, x, y, leftW, h, container);
+                layoutTreemap(rightNodes, x + leftW, y, w - leftW, h, container);
+            } else {
+                const leftH = h * (leftSum / sum);
+                layoutTreemap(leftNodes, x, y, w, leftH, container);
+                layoutTreemap(rightNodes, x, y + leftH, w, h - leftH, container);
+            }
+        }
+
+        function createRect(node, x, y, w, h, container) {
+            const div = document.createElement('div');
+            div.className = 'treemap-cell';
+            div.style.left = x + '%';
+            div.style.top = y + '%';
+            div.style.width = w + '%';
+            div.style.height = h + '%';
+            div.style.position = 'absolute';
+            
+            // Generate distinct colored background
+            div.style.backgroundColor = getBuildingColorValue(node.name);
+            
+            // HTML content layout
+            div.innerHTML = `
+                <div class="treemap-cell-content">
+                    <span class="treemap-cell-name">${node.name}</span>
+                    <span class="treemap-cell-value">${node.value}</span>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        const getBuildingColorValue = (name) => {
+            const colors = getThemeColorsHex();
+            const palette = colors.palette;
+            const index = Math.abs(hashCodeString(name)) % palette.length;
+            return palette[index];
+        };
+
+        function hashCodeString(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return hash;
+        }
+
+        const getThemeColorsHex = () => {
+            const currentTheme = localStorage.getItem('nalco_theme') || 'blue';
+            if (currentTheme === 'green') {
+                return { palette: ['#0f766e', '#14b8a6', '#0d9488', '#2dd4bf', '#059669', '#34d399'] };
+            } else if (currentTheme === 'amber') {
+                return { palette: ['#b45309', '#f59e0b', '#d97706', '#fbbf24', '#d97706', '#f59e0b'] };
+            } else { // default blue
+                return { palette: ['#1e3a8a', '#3b82f6', '#2563eb', '#60a5fa', '#1e40af', '#60a5fa'] };
+            }
+        };
+
+        // Generates 2092 asset rows matching PDF ratios
+        function generateAssetData() {
+            const assets = [];
+            let assetIdCounter = 10001;
+            const count = 2092;
+
+            // Define exact categories array to match 2092 records
+            const categoryList = [];
+            for (let i = 0; i < 902; i++) categoryList.push('PCS');
+            for (let i = 0; i < 765; i++) categoryList.push('Other');
+            for (let i = 0; i < 148; i++) categoryList.push('DMP');
+            for (let i = 0; i < 123; i++) categoryList.push('SCS');
+            for (let i = 0; i < 55; i++) categoryList.push('CLM');
+            while (categoryList.length < count) categoryList.push('Other');
+
+            // Warranty state ratio mapping
+            const warrantyList = [];
+            for (let i = 0; i < 110; i++) warrantyList.push('Y (Active)');
+            for (let i = 0; i < 1982; i++) warrantyList.push('N (None)');
+
+            // AMC status ratio mapping
+            const amcList = [];
+            for (let i = 0; i < 1410; i++) amcList.push('Active');
+            for (let i = 0; i < 350; i++) amcList.push('Expired');
+            for (let i = 0; i < 332; i++) amcList.push('Blank');
+
+            // OS list ratio mapping
+            const osList = [];
+            for (let i = 0; i < 577; i++) osList.push('Win 10');
+            for (let i = 0; i < 360; i++) osList.push('Win 7');
+            for (let i = 0; i < 16; i++) osList.push('Other');
+            for (let i = 0; i < 13; i++) osList.push('Server');
+            for (let i = 0; i < 6; i++) osList.push('Win 11');
+            while (osList.length < count) osList.push('None');
+
+            // Vendor list ratio mapping
+            const vendorList = [];
+            for (let i = 0; i < 642; i++) vendorList.push('HP');
+            for (let i = 0; i < 280; i++) vendorList.push('Acer');
+            for (let i = 0; i < 240; i++) vendorList.push('DELL');
+            for (let i = 0; i < 216; i++) vendorList.push('LENOVO');
+            for (let i = 0; i < 190; i++) vendorList.push('Epson');
+            for (let i = 0; i < 93; i++) vendorList.push('ZECONS');
+            while (vendorList.length < count) vendorList.push('Other');
+
+            // Building list ratio mapping
+            const buildingList = [];
+            for (let i = 0; i < 252; i++) buildingList.push('ADMIN BUILDING');
+            for (let i = 0; i < 175; i++) buildingList.push('PLANT OFFICE');
+            for (let i = 0; i < 156; i++) buildingList.push('SYSTEMS');
+            for (let i = 0; i < 113; i++) buildingList.push('DPS');
+            for (let i = 0; i < 92; i++) buildingList.push('SVM');
+            for (let i = 0; i < 80; i++) buildingList.push('HOSPITAL');
+            for (let i = 0; i < 60; i++) buildingList.push('PROJECT');
+            for (let i = 0; i < 40; i++) buildingList.push('TRAINING');
+            for (let i = 0; i < 30; i++) buildingList.push('PLANT');
+            while (buildingList.length < count) buildingList.push('OTHER');
+
+            for (let i = 0; i < count; i++) {
+                const id = 'NALCO-IT-' + assetIdCounter++;
+                const category = categoryList[i];
+                const building = buildingList[i];
+                const warranty = warrantyList[i];
+                const amc = amcList[i];
+                const os = osList[i];
+                const vendor = vendorList[i];
+
+                let poValue = 45000;
+                if (category === 'PCS') poValue = 52000 + (i % 15) * 1800;
+                else if (category === 'DMP') poValue = 18000 + (i % 10) * 1200;
+                else if (os === 'Server') poValue = 280000 + (i % 5) * 45000;
+                else poValue = 32000 + (i % 20) * 900;
+
+                assets.push({
+                    id: id,
+                    name: `${vendor} ${category === 'PCS' ? 'Workstation' : category === 'DMP' ? 'Line Printer' : 'Equipment'}`,
+                    building: building,
+                    category: category,
+                    warranty: warranty,
+                    amc: amc,
+                    os: os,
+                    vendor: vendor,
+                    poValue: poValue
+                });
+            }
+            return assets;
+        }
+    </script>
+</body>
+</html>
